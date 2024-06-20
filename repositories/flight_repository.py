@@ -139,6 +139,16 @@ class FlightRepository:
                 raise ValueError('Flight is not found')
             if not flight_to_change.suitable_planes:
                 raise ValueError('Flight does not contain any planes')
+            delete_flag = 0
+            for plane in flight_to_change.suitable_planes:
+                new_fuel = plane.current_fuel - plane.fuel_consumption * flight_to_change.distance
+                if new_fuel < 0:
+                    flight_to_change.suitable_planes.remove(plane)
+                    delete_flag = 1
+            if delete_flag == 1:
+                await session.commit()
+                raise ValueError('Flight contained unsuitable planes which were deleted. '
+                                 'Try conducting this flight again')
             for plane in flight_to_change.suitable_planes:
                 plane.current_fuel = plane.current_fuel - plane.fuel_consumption * flight_to_change.distance
                 if plane.current_fuel < plane.fuel_consumption * flight_to_change.distance:
