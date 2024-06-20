@@ -1,9 +1,9 @@
 from uuid import UUID
 from fastapi import APIRouter, HTTPException
 from sqlalchemy.exc import NoResultFound
-from flight_repository import FlightRepository
-from flight_models import Flight, FlightDto
-from plane_models import Plane
+from repositories.flight_repository import FlightRepository
+from models.flight_models import Flight, FlightDto
+from models.plane_models import Plane
 
 router = APIRouter(
     prefix="/flights",
