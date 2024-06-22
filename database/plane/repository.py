@@ -6,7 +6,7 @@ from server.api.plane.schemas import PlaneDto, Plane
 
 class PlaneRepository:
     @staticmethod
-    async def add_plane(cls, plane: PlaneDto) -> UUID:
+    async def add_plane(plane: PlaneDto) -> UUID:
         async with new_session() as session:
             data = plane.model_dump()
             if data['current_fuel'] > data['fuel_consumption'] * data['max_distance']:
@@ -19,12 +19,11 @@ class PlaneRepository:
             new_plane = PlaneSchema(**data)
             new_plane.id = uuid4()
             session.add(new_plane)
-            await session.flush()
             await session.commit()
             return new_plane.id
 
     @staticmethod
-    async def edit_plane(cls, plane_id: UUID, plane: PlaneDto) -> Plane:
+    async def edit_plane(plane_id: UUID, plane: PlaneDto) -> Plane:
         async with (new_session() as session):
             data = plane.model_dump()
             query = select(PlaneSchema).filter_by(id=plane_id)
@@ -36,7 +35,7 @@ class PlaneRepository:
             return Plane.from_orm(plane_to_change)
 
     @staticmethod
-    async def delete_plane(cls, plane_id: UUID) -> Plane:
+    async def delete_plane(plane_id: UUID) -> Plane:
         async with (new_session() as session):
             query = select(PlaneSchema).filter_by(id=plane_id)
             result = await session.execute(query)
@@ -46,7 +45,7 @@ class PlaneRepository:
             return Plane.from_orm(plane_to_delete)
 
     @staticmethod
-    async def get_planes(cls) -> list[Plane]:
+    async def get_planes() -> list[Plane]:
         async with new_session() as session:
             query = select(PlaneSchema)
             result = await session.execute(query)
@@ -54,7 +53,7 @@ class PlaneRepository:
             return [Plane.from_orm(x) for x in plane_models]
 
     @staticmethod
-    async def get_average_capacity(cls) -> int:
+    async def get_average_capacity() -> int:
         async with new_session() as session:
             query = select(PlaneSchema.max_capacity)
             result = await session.execute(query)
@@ -65,7 +64,7 @@ class PlaneRepository:
             return round(average)
 
     @staticmethod
-    async def get_average_distance(cls) -> int:
+    async def get_average_distance() -> int:
         async with new_session() as session:
             query = select(PlaneSchema.max_distance)
             result = await session.execute(query)
@@ -76,7 +75,7 @@ class PlaneRepository:
             return round(average)
 
     @staticmethod
-    async def get_max_capacity(cls) -> int:
+    async def get_max_capacity() -> int:
         async with new_session() as session:
             query = select(PlaneSchema.max_capacity)
             result = await session.execute(query)
@@ -87,7 +86,7 @@ class PlaneRepository:
             return max_capacity
 
     @staticmethod
-    async def get_max_distance(cls) -> int:
+    async def get_max_distance() -> int:
         async with new_session() as session:
             query = select(PlaneSchema.max_distance)
             result = await session.execute(query)

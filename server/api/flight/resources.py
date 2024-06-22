@@ -16,8 +16,8 @@ router = APIRouter(
 async def add_flight(flight: FlightDto) -> dict[str, UUID]:
     try:
         new_flight_id = await FlightRepository.add_flight(flight)
-    except ValueError:
-        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail="Flight already exists")
+    except ValueError as e:
+        raise HTTPException(status_code=HTTPStatus.BAD_REQUEST, detail=e.args[0])
     return {"id": new_flight_id}
 
 

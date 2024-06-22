@@ -8,25 +8,26 @@ from server.api.plane.schemas import Plane
 
 class FlightRepository:
     @staticmethod
-    async def add_flight(cls, flight: FlightDto) -> UUID:
+    async def add_flight(flight: FlightDto) -> UUID:
         async with (new_session() as session):
             data = flight.model_dump()
+            if data['begin_airport'] == data['end_airport']:
+                raise ValueError("Airports must be different")
             query = select(FlightSchema).filter_by(
                 begin_airport=data['begin_airport']).filter_by(
                 end_airport=data['end_airport'])
             result = await session.execute(query)
             existing_flight = result.scalar_one_or_none()
             if existing_flight is not None:
-                raise ValueError
+                raise ValueError("Flight already exist")
             new_flight = FlightSchema(**data)
             new_flight.id = uuid4()
             session.add(new_flight)
-            await session.flush()
             await session.commit()
             return new_flight.id
 
     @staticmethod
-    async def edit_flight(cls, flight_id: UUID, flight: FlightDto) -> Flight:
+    async def edit_flight(flight_id: UUID, flight: FlightDto) -> Flight:
         async with (new_session() as session):
             data = flight.model_dump()
             query = select(FlightSchema).options(
@@ -39,7 +40,7 @@ class FlightRepository:
             return Flight.from_orm(flight_to_change)
 
     @staticmethod
-    async def delete_flight(cls, flight_id: UUID) -> Flight:
+    async def delete_flight(flight_id: UUID) -> Flight:
         async with (new_session() as session):
             query = select(FlightSchema).filter_by(id=flight_id)
             result = await session.execute(query)
@@ -49,7 +50,7 @@ class FlightRepository:
             return Flight.from_orm(flight_to_delete)
 
     @staticmethod
-    async def get_flights(cls) -> list[Flight]:
+    async def get_flights() -> list[Flight]:
         async with (new_session() as session):
             query = select(FlightSchema).options(joinedload(FlightSchema.suitable_planes))
             result = await session.execute(query)
@@ -57,7 +58,7 @@ class FlightRepository:
             return [Flight.from_orm(x) for x in flight_models]
 
     @staticmethod
-    async def add_plane(cls, flight_id: UUID, plane_id: UUID) -> Flight:
+    async def add_plane(flight_id: UUID, plane_id: UUID) -> Flight:
         async with (new_session() as session):
             flight_query = select(FlightSchema).options(
                 joinedload(FlightSchema.suitable_planes)).filter_by(id=flight_id)
@@ -83,7 +84,7 @@ class FlightRepository:
             return Flight.from_orm(flight_to_change)
 
     @staticmethod
-    async def delete_plane(cls, flight_id: UUID, plane_id: UUID) -> Flight:
+    async def delete_plane(flight_id: UUID, plane_id: UUID) -> Flight:
         async with (new_session() as session):
             flight_query = select(FlightSchema).options(
                 joinedload(FlightSchema.suitable_planes)).filter_by(
@@ -104,7 +105,7 @@ class FlightRepository:
             return Flight.from_orm(flight_to_change)
 
     @staticmethod
-    async def get_available_planes_by_capacity(cls, flight_id: UUID) -> list[Plane]:
+    async def get_available_planes_by_capacity(flight_id: UUID) -> list[Plane]:
         async with (new_session() as session):
             flight_query = select(FlightSchema).filter_by(id=flight_id)
             result = await session.execute(flight_query)
@@ -116,7 +117,7 @@ class FlightRepository:
             return available_planes
 
     @staticmethod
-    async def get_available_planes_by_distance(cls, flight_id: UUID) -> list[Plane]:
+    async def get_available_planes_by_distance(flight_id: UUID) -> list[Plane]:
         async with (new_session() as session):
             flight_query = select(FlightSchema).filter_by(id=flight_id)
             result = await session.execute(flight_query)
@@ -128,7 +129,7 @@ class FlightRepository:
             return available_planes
 
     @staticmethod
-    async def conduct_flight(cls, flight_id: UUID) -> Flight:
+    async def conduct_flight(flight_id: UUID) -> Flight:
         async with (new_session() as session):
             flight_query = select(FlightSchema).options(
                 joinedload(FlightSchema.suitable_planes)).filter_by(
