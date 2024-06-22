@@ -1,7 +1,7 @@
 from uuid import UUID, uuid4
 from sqlalchemy import select
-from database import PlaneSchema, new_session
-from models.plane_models import PlaneDto, Plane
+from database.database import PlaneSchema, new_session
+from server.api.plane.schemas import PlaneDto, Plane
 
 
 class PlaneRepository:

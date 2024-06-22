@@ -1,6 +1,6 @@
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, field_validator
-from models.plane_models import Plane
+from server.api.plane.schemas import Plane
 
 
 class FlightDto(BaseModel):

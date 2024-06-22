@@ -2,8 +2,8 @@ from fastapi import APIRouter
 import json
 from io import BytesIO
 from starlette.responses import StreamingResponse
-from routers.planes_router import get_all_planes
-from routers.flights_router import get_all_flights
+from server.api.plane.resources import get_all_planes
+from server.api.flight.resources import get_all_flights
 from uuid_encoder import UUIDEncoder
 
 router = APIRouter(

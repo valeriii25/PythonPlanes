@@ -1,9 +1,9 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
-from database import create_tables
-from routers.planes_router import router as planes_router
-from routers.flights_router import router as flights_router
-from export_router import router as export_router
+from database.database import create_tables
+from server.api.plane.resources import router as planes_router
+from server.api.flight.resources import router as flights_router
+from server.api.export.resources import router as export_router
 
 
 @asynccontextmanager

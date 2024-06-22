@@ -1,9 +1,9 @@
 from uuid import UUID, uuid4
 from sqlalchemy import select
 from sqlalchemy.orm import joinedload
-from database import FlightSchema, new_session, PlaneSchema
-from models.flight_models import FlightDto, Flight
-from models.plane_models import Plane
+from database.database import FlightSchema, new_session, PlaneSchema
+from server.api.flight.schemas import FlightDto, Flight
+from server.api.plane.schemas import Plane
 
 
 class FlightRepository:
