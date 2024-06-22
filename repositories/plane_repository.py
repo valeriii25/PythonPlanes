@@ -5,7 +5,7 @@ from models.plane_models import PlaneDto, Plane
 
 
 class PlaneRepository:
-    @classmethod
+    @staticmethod
     async def add_plane(cls, plane: PlaneDto) -> UUID:
         async with new_session() as session:
             data = plane.model_dump()
@@ -23,7 +23,7 @@ class PlaneRepository:
             await session.commit()
             return new_plane.id
 
-    @classmethod
+    @staticmethod
     async def edit_plane(cls, plane_id: UUID, plane: PlaneDto) -> Plane:
         async with (new_session() as session):
             data = plane.model_dump()
@@ -35,7 +35,7 @@ class PlaneRepository:
             await session.commit()
             return Plane.from_orm(plane_to_change)
 
-    @classmethod
+    @staticmethod
     async def delete_plane(cls, plane_id: UUID) -> Plane:
         async with (new_session() as session):
             query = select(PlaneSchema).filter_by(id=plane_id)
@@ -45,7 +45,7 @@ class PlaneRepository:
             await session.commit()
             return Plane.from_orm(plane_to_delete)
 
-    @classmethod
+    @staticmethod
     async def get_planes(cls) -> list[Plane]:
         async with new_session() as session:
             query = select(PlaneSchema)
@@ -53,7 +53,7 @@ class PlaneRepository:
             plane_models = result.scalars().all()
             return [Plane.from_orm(x) for x in plane_models]
 
-    @classmethod
+    @staticmethod
     async def get_average_capacity(cls) -> int:
         async with new_session() as session:
             query = select(PlaneSchema.max_capacity)
@@ -64,7 +64,7 @@ class PlaneRepository:
             average = sum(plane_capacities) / len(plane_capacities)
             return round(average)
 
-    @classmethod
+    @staticmethod
     async def get_average_distance(cls) -> int:
         async with new_session() as session:
             query = select(PlaneSchema.max_distance)
@@ -75,7 +75,7 @@ class PlaneRepository:
             average = sum(plane_distances) / len(plane_distances)
             return round(average)
 
-    @classmethod
+    @staticmethod
     async def get_max_capacity(cls) -> int:
         async with new_session() as session:
             query = select(PlaneSchema.max_capacity)
@@ -86,7 +86,7 @@ class PlaneRepository:
             max_capacity = max(plane_capacities)
             return max_capacity
 
-    @classmethod
+    @staticmethod
     async def get_max_distance(cls) -> int:
         async with new_session() as session:
             query = select(PlaneSchema.max_distance)

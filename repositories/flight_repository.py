@@ -7,7 +7,7 @@ from models.plane_models import Plane
 
 
 class FlightRepository:
-    @classmethod
+    @staticmethod
     async def add_flight(cls, flight: FlightDto) -> UUID:
         async with (new_session() as session):
             data = flight.model_dump()
@@ -25,7 +25,7 @@ class FlightRepository:
             await session.commit()
             return new_flight.id
 
-    @classmethod
+    @staticmethod
     async def edit_flight(cls, flight_id: UUID, flight: FlightDto) -> Flight:
         async with (new_session() as session):
             data = flight.model_dump()
@@ -38,7 +38,7 @@ class FlightRepository:
             await session.commit()
             return Flight.from_orm(flight_to_change)
 
-    @classmethod
+    @staticmethod
     async def delete_flight(cls, flight_id: UUID) -> Flight:
         async with (new_session() as session):
             query = select(FlightSchema).filter_by(id=flight_id)
@@ -48,7 +48,7 @@ class FlightRepository:
             await session.commit()
             return Flight.from_orm(flight_to_delete)
 
-    @classmethod
+    @staticmethod
     async def get_flights(cls) -> list[Flight]:
         async with (new_session() as session):
             query = select(FlightSchema).options(joinedload(FlightSchema.suitable_planes))
@@ -56,7 +56,7 @@ class FlightRepository:
             flight_models = result.scalars().unique().all()
             return [Flight.from_orm(x) for x in flight_models]
 
-    @classmethod
+    @staticmethod
     async def add_plane(cls, flight_id: UUID, plane_id: UUID) -> Flight:
         async with (new_session() as session):
             flight_query = select(FlightSchema).options(
@@ -64,12 +64,12 @@ class FlightRepository:
             result = await session.execute(flight_query)
             flight_to_change = result.unique().scalar_one_or_none()
             if flight_to_change is None:
-                raise ValueError('Flight is not found')
+                raise Exception('Flight is not found')
             plane_query = select(PlaneSchema).filter_by(id=plane_id)
             result = await session.execute(plane_query)
             plane_to_add = result.scalar_one_or_none()
             if plane_to_add is None:
-                raise ValueError('Plane is not found')
+                raise Exception('Plane is not found')
             if plane_to_add in flight_to_change.suitable_planes:
                 raise ValueError('Flight already contains this plane')
             if plane_to_add.max_capacity < flight_to_change.passengers:
@@ -82,7 +82,7 @@ class FlightRepository:
             await session.commit()
             return Flight.from_orm(flight_to_change)
 
-    @classmethod
+    @staticmethod
     async def delete_plane(cls, flight_id: UUID, plane_id: UUID) -> Flight:
         async with (new_session() as session):
             flight_query = select(FlightSchema).options(
@@ -91,19 +91,19 @@ class FlightRepository:
             result = await session.execute(flight_query)
             flight_to_change = result.unique().scalar_one_or_none()
             if flight_to_change is None:
-                raise ValueError('Flight is not found')
+                raise Exception('Flight is not found')
             plane_query = select(PlaneSchema).filter_by(id=plane_id)
             result = await session.execute(plane_query)
             plane_to_delete = result.scalar_one_or_none()
             if plane_to_delete is None:
-                raise ValueError('Plane is not found')
+                raise Exception('Plane is not found')
             if plane_to_delete not in flight_to_change.suitable_planes:
                 raise ValueError('Flight does not contain this plane')
             flight_to_change.suitable_planes.remove(plane_to_delete)
             await session.commit()
             return Flight.from_orm(flight_to_change)
 
-    @classmethod
+    @staticmethod
     async def get_available_planes_by_capacity(cls, flight_id: UUID) -> list[Plane]:
         async with (new_session() as session):
             flight_query = select(FlightSchema).filter_by(id=flight_id)
@@ -115,7 +115,7 @@ class FlightRepository:
             available_planes = [Plane.from_orm(x) for x in result.scalars().all()]
             return available_planes
 
-    @classmethod
+    @staticmethod
     async def get_available_planes_by_distance(cls, flight_id: UUID) -> list[Plane]:
         async with (new_session() as session):
             flight_query = select(FlightSchema).filter_by(id=flight_id)
@@ -127,7 +127,7 @@ class FlightRepository:
             available_planes = [Plane.from_orm(x) for x in result.scalars().all()]
             return available_planes
 
-    @classmethod
+    @staticmethod
     async def conduct_flight(cls, flight_id: UUID) -> Flight:
         async with (new_session() as session):
             flight_query = select(FlightSchema).options(
@@ -136,7 +136,7 @@ class FlightRepository:
             result = await session.execute(flight_query)
             flight_to_change = result.unique().scalar_one_or_none()
             if flight_to_change is None:
-                raise ValueError('Flight is not found')
+                raise Exception('Flight is not found')
             if not flight_to_change.suitable_planes:
                 raise ValueError('Flight does not contain any planes')
             delete_flag = 0
@@ -147,8 +147,8 @@ class FlightRepository:
                     delete_flag = 1
             if delete_flag == 1:
                 await session.commit()
-                raise ValueError('Flight contained unsuitable planes which were deleted. '
-                                 'Try conducting this flight again')
+                raise OSError('Flight contained unsuitable planes. Now they are deleted. '
+                              'You can try conducting this flight again :)')
             for plane in flight_to_change.suitable_planes:
                 plane.current_fuel = plane.current_fuel - plane.fuel_consumption * flight_to_change.distance
                 if plane.current_fuel < plane.fuel_consumption * flight_to_change.distance:
